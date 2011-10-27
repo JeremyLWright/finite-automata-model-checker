@@ -7,7 +7,7 @@ import Model
 parser = xml.sax.make_parser()
 handler = JFLAPParser.StateHandler()
 parser.setContentHandler(handler)
-parser.parse("Input3.jff")
+parser.parse("Input4.jff")
 #pprint.pprint(handler.states)
 
 systemModel = Model.DFA()
