@@ -17,6 +17,8 @@ for stateId in handler.states:
     parsedNode = handler.states[stateId]
     node.Id = parsedNode.Id
     node.Name = parsedNode.Name
+    node.IsInital = parsedNode.IsInital
+    node.IsFinal = parsedNode.IsFinal
     for transition in parsedNode.Transitions:
         node.Transitions[transition[0]] = transition[1]
     systemModel.addState(node)
@@ -27,4 +29,5 @@ print systemModel.graph[0]
 print systemModel.graph[1]
 print systemModel.graph[2]
 
+print systemModel
         
