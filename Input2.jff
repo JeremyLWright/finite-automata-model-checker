@@ -19,9 +19,9 @@
 			<read>b</read>
 		</transition>
 		<transition>
-			<from>0</from>
+			<from>1</from>
 			<to>0</to>
-			<read>b</read>
+			<read>a</read>
 		</transition>
 		<transition>
 			<from>1</from>

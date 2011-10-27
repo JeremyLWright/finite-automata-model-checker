@@ -1,12 +1,30 @@
-from InputFile import StateHandler
+import JFLAPParser
 import xml.sax
 import pprint
+import Model
+
 
 parser = xml.sax.make_parser()
-handler = StateHandler()
+handler = JFLAPParser.StateHandler()
 parser.setContentHandler(handler)
-parser.parse("Input1.jff")
-pprint.pprint(handler.states)
+parser.parse("Input3.jff")
+#pprint.pprint(handler.states)
+
+systemModel = Model.DFA()
 
 for stateId in handler.states:
-    handler.states[stateId].ToString()
+    node = Model.DFAState()
+    parsedNode = handler.states[stateId]
+    node.Id = parsedNode.Id
+    node.Name = parsedNode.Name
+    for transition in parsedNode.Transitions:
+        node.Transitions[transition[0]] = transition[1]
+    systemModel.addState(node)
+
+systemModel.connectGraph()
+
+print systemModel.graph[0]
+print systemModel.graph[1]
+print systemModel.graph[2]
+
+        

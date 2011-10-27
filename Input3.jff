@@ -12,21 +12,35 @@
 			<y>136.0</y>
 			<final/>
 		</state>
+		<state id="2" name="q2">
+			<x>425.0</x>
+			<y>134.0</y>
+		</state>
 		<!--The list of transitions.-->
 		<transition>
-			<from>0</from>
-			<to>1</to>
+			<from>1</from>
+			<to>2</to>
 			<read>b</read>
 		</transition>
 		<transition>
 			<from>0</from>
-			<to>0</to>
+			<to>1</to>
 			<read>b</read>
 		</transition>
 		<transition>
 			<from>1</from>
-			<to>1</to>
+			<to>0</to>
+			<read>a</read>
+		</transition>
+		<transition>
+			<from>2</from>
+			<to>2</to>
 			<read>b</read>
+		</transition>
+		<transition>
+			<from>2</from>
+			<to>2</to>
+			<read>a</read>
 		</transition>
 		<transition>
 			<from>0</from>

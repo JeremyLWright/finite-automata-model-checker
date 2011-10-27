@@ -52,7 +52,7 @@ class StateHandler(xml.sax.handler.ContentHandler):
 
     def characters(self, data):
         if self.ParsingLabel:
-            self.TmpTransition["label"] = data
+            self.TmpTransition["label"] = data.encode('ascii', 'replace')
         elif self.ParsingFromTransition:
             self.TmpTransition["from"] = int(data)
         elif self.ParsingToTransition:
