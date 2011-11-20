@@ -27,6 +27,7 @@ public:
     void AddTransition(int FromNode, int ToNode, string label);
     void SetStartState(int Name);
     void AddFinalState(int Name);
+    bool Run(list<string> input);
     int GetStartState();
     list<int> GetFinalStates();
     //void FollowTransition(int CurrentNode, int& DestinationNode, string label);

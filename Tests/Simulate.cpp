@@ -11,14 +11,29 @@
 
 class Simulate : public ::testing::Test {
     protected:
+        //Create a simple automaton
+        // ->0----a---->(1)--b--
+        //              ^    |
+        //               -----
+        // Accepted Strings: ab*
         virtual void SetUp()
         {
+            a = Automaton::construct();
+            a->AddState(0);
+            a->AddState(1);
+
+            a->AddTransition(0, 1, "a");
+            a->AddTransition(1, 1, "b");
+
+            a->SetStartState(0);
+            a->AddFinalState(1);
         }
 
         virtual void TearDown()
         {
         }
 
+        Automaton::Ptr a;
 };
 
 TEST_F(Simulate, Simple)
@@ -26,27 +41,47 @@ TEST_F(Simulate, Simple)
     EXPECT_EQ(1,1);
 }
 
-//Create a simple automaton
-// ->0----a---->1--b--
-//              ^    |
-//               -----
-// Accepted Strings: ab*
-TEST_F(Simulate, RunOne)
+TEST_F(Simulate, TestStartFinal)
 {
-    Automaton::Ptr a = Automaton::construct();
-
-    a->AddState(0);
-    a->AddState(1);
-
-    a->AddTransition(0, 1, "a");
-    a->AddTransition(1, 1, "b");
-
-    a->SetStartState(0);
-    a->AddFinalState(1);
-
     EXPECT_EQ(0, a->GetStartState());
     list<int> states = a->GetFinalStates();
     list<int>::const_iterator i = states.begin();
     EXPECT_EQ(1, *i);
 
+}
+
+TEST_F(Simulate, RunAcceptingString)
+{
+    //Run the String a
+    list<string> input;
+    input.push_back("a");
+    EXPECT_TRUE(a->Run(input));
+}
+
+TEST_F(Simulate, RunAcceptingString1)
+{
+    //Run the String a
+    list<string> input;
+    input.push_back("a");
+    input.push_back("b");
+    EXPECT_TRUE(a->Run(input));
+}
+
+TEST_F(Simulate, RunAcceptingString2)
+{
+    //Run the String a
+    list<string> input;
+    input.push_back("a");
+    input.push_back("b");
+    input.push_back("b");
+    EXPECT_TRUE(a->Run(input));
+}
+
+TEST_F(Simulate, RunNotAcceptingString)
+{
+    //Run the String a
+    list<string> input;
+    input.push_back("a");
+    input.push_back("a");
+    EXPECT_FALSE(a->Run(input));
 }

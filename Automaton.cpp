@@ -114,3 +114,31 @@ void  Automaton::State::Name(int n)
     name = n;
 }
 
+bool Automaton::Run(list<string> input)
+{
+    int currentState = GetStartState();
+    for(list<string>::const_iterator t = input.begin();
+            t != input.end();
+            ++t)
+    {
+     
+        State::Ptr tempState = states[currentState];
+        if(tempState->transitions.find(*t) == tempState->transitions.end())
+        {
+            return false; //There is no transition for the given input, reject
+        }
+        else
+        {
+            currentState = states[currentState]->transitions[*t];
+        }
+    }
+    if(states[currentState]->Property() == State::FINAL)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
