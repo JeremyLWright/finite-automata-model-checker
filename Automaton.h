@@ -32,7 +32,6 @@ public:
     int GetStartState();
     list<int> GetFinalStates();
     Automaton::Ptr operator~() const;
-    //void FollowTransition(int CurrentNode, int& DestinationNode, string label);
     
 protected:
     Automaton (Automaton const & p);
