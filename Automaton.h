@@ -31,7 +31,10 @@ public:
     bool Run(list<string> input);
     int GetStartState();
     list<int> GetFinalStates();
+    // Implements complement!
     Automaton::Ptr operator~() const;
+    Automaton::Ptr opIntersect(Automaton::Ptr rhs) const;
+    Automaton::Ptr opUnion(Automaton::Ptr rhs) const;
     
 protected:
     Automaton (Automaton const & p);

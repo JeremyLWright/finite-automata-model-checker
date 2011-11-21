@@ -142,6 +142,12 @@ Automaton::Automaton(Automaton const & p)
     }
 }
 
+Automaton::Ptr intersect(Automaton::Ptr rhs) 
+{
+    Automaton::Ptr result = Automaton::construct();
+
+}
+
 ///////////////// State Class ////////////////////////////
 
 Automaton::State::Ptr  Automaton::State::construct(int Name)
