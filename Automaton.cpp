@@ -6,6 +6,14 @@ Automaton::Ptr Automaton::construct()
     return c;
 }
 
+Automaton::Ptr Automaton::construct(Automaton::WeakPtr const copy)
+{
+    Ptr j = copy.lock();
+    Automaton::Ptr c(new Automaton(*(j.get())));
+    c->self = c;
+    return c;
+}
+
 Automaton::Automaton()
 {
 }
@@ -35,19 +43,19 @@ void Automaton::AddTransition(int FromNode, int ToNode, string label)
 void Automaton::SetStartState(int Name)
 {
     startState = Name;
-    states[Name]->Property(State::START);
+    states[Name]->IsStart(true);
     ///TODO throw an exceptions if there is already a start state.
 }
 
 void Automaton::AddFinalState(int Name)
 {
-    states[Name]->Property(State::FINAL);
+    states[Name]->IsFinal(true);
 }
 
 int Automaton::GetStartState()
 {
     State::Ptr s = states[startState];
-    if(s->Property() == State::START)
+    if(s->IsStart())
     {
         return s->Name(); 
     }
@@ -64,7 +72,7 @@ list<int> Automaton::GetFinalStates()
             f != states.end();
             ++f)
     {
-        if(f->second->Property() == State::FINAL)
+        if(f->second->IsFinal())
             finals.push_back(f->second->Name());
     }
     if(finals.empty())
@@ -76,42 +84,20 @@ list<int> Automaton::GetFinalStates()
 }
 
 
-
-Automaton::State::Ptr  Automaton::State::construct(int Name)
+Automaton::Ptr Automaton::operator~() const
 {
-    Automaton::State::Ptr c(new Automaton::State(Name));
-    c->self = c;
-    return c;
-}
+    Automaton::Ptr b = Automaton::construct(self);
+    for(map<int, State::Ptr>::const_iterator f = b->states.begin();
+            f != b->states.end();
+            ++f)
+    {
+        if(f->second->IsFinal())
+            f->second->IsFinal(false);
+        else
+            f->second->IsFinal(true);
+    }
 
-Automaton::State::State(int Name):
-    property(NORMAL),
-    name(Name)
-{
-}
-
-Automaton::State::~State()
-{
-}
-
-Automaton::State::Property_t  Automaton::State::Property()
-{
-    return property;
-}
-
-void  Automaton::State::Property(Property_t prop)
-{
-    property = prop;
-}
-
-int  Automaton::State::Name()
-{
-    return name;
-}
-
-void  Automaton::State::Name(int n)
-{
-    name = n;
+    return b;
 }
 
 bool Automaton::Run(list<string> input)
@@ -132,7 +118,7 @@ bool Automaton::Run(list<string> input)
             currentState = states[currentState]->transitions[*t];
         }
     }
-    if(states[currentState]->Property() == State::FINAL)
+    if(states[currentState]->IsFinal())
     {
         return true;
     }
@@ -140,5 +126,68 @@ bool Automaton::Run(list<string> input)
     {
         return false;
     }
+}
+
+Automaton::Automaton(Automaton const & p)
+{
+    startState = p.startState;
+    for(map<int, State::Ptr>::const_iterator i = p.states.begin();
+            i != p.states.end();
+            ++i)
+    {
+        states[i->first] = State::construct(i->second->Name());
+        states[i->first]->transitions = i->second->transitions;
+    }
+}
+
+///////////////// State Class ////////////////////////////
+
+Automaton::State::Ptr  Automaton::State::construct(int Name)
+{
+    Automaton::State::Ptr c(new Automaton::State(Name));
+    c->self = c;
+    return c;
+}
+
+Automaton::State::State(int Name):
+    isStart(false),
+    isFinal(false),
+    name(Name)
+{
+}
+
+Automaton::State::~State()
+{
+}
+
+
+bool  Automaton::State::IsFinal()
+{
+    return isFinal;
+}
+
+void  Automaton::State::IsFinal(bool b)
+{
+    isFinal = b;
+}
+
+bool  Automaton::State::IsStart()
+{
+    return isStart;
+}
+
+void  Automaton::State::IsStart(bool b)
+{
+    isStart = b;
+}
+
+int  Automaton::State::Name()
+{
+    return name;
+}
+
+void  Automaton::State::Name(int n)
+{
+    name = n;
 }
 

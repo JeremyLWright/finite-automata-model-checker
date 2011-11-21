@@ -22,6 +22,7 @@ public:
     typedef std::tr1::shared_ptr<Automaton> Ptr;
     typedef std::tr1::weak_ptr<Automaton> WeakPtr;
     static Automaton::Ptr construct();
+    static Automaton::Ptr construct(Automaton::WeakPtr const copy);
     virtual ~Automaton();
     void AddState(int Name);
     void AddTransition(int FromNode, int ToNode, string label);
@@ -30,29 +31,29 @@ public:
     bool Run(list<string> input);
     int GetStartState();
     list<int> GetFinalStates();
+    Automaton::Ptr operator~() const;
     //void FollowTransition(int CurrentNode, int& DestinationNode, string label);
     
 protected:
+    Automaton (Automaton const & p);
+    Automaton operator=(Automaton const &);
  class State
     {
     public:
         typedef std::tr1::shared_ptr<State> Ptr;
         typedef std::tr1::weak_ptr<State> WeakPtr;
-        enum Property_t
-        {
-            NORMAL,
-            START,
-            FINAL
-        };
         static Ptr construct(int Name);
-        Property_t Property();
-        void Property(Property_t);
+        bool IsStart();
+        void IsStart(bool);
+        bool IsFinal();
+        void IsFinal(bool);
         int Name();
         void Name(int);
         virtual ~State();
         map<string, int> transitions;
     private:
-        Property_t property;
+        bool isStart;
+        bool isFinal;
         int name;
         State(int Name);
         State::WeakPtr self;

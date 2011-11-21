@@ -27,6 +27,8 @@ class Simulate : public ::testing::Test {
 
             a->SetStartState(0);
             a->AddFinalState(1);
+            complementA = ~(*a);
+
         }
 
         virtual void TearDown()
@@ -34,6 +36,7 @@ class Simulate : public ::testing::Test {
         }
 
         Automaton::Ptr a;
+        Automaton::Ptr complementA;
 };
 
 TEST_F(Simulate, Simple)
@@ -56,6 +59,7 @@ TEST_F(Simulate, RunAcceptingString)
     list<string> input;
     input.push_back("a");
     EXPECT_TRUE(a->Run(input));
+    EXPECT_FALSE(complementA->Run(input));
 }
 
 TEST_F(Simulate, RunAcceptingString1)
@@ -65,6 +69,7 @@ TEST_F(Simulate, RunAcceptingString1)
     input.push_back("a");
     input.push_back("b");
     EXPECT_TRUE(a->Run(input));
+    EXPECT_FALSE(complementA->Run(input));
 }
 
 TEST_F(Simulate, RunAcceptingString2)
@@ -75,6 +80,7 @@ TEST_F(Simulate, RunAcceptingString2)
     input.push_back("b");
     input.push_back("b");
     EXPECT_TRUE(a->Run(input));
+    EXPECT_FALSE(complementA->Run(input));
 }
 
 TEST_F(Simulate, RunNotAcceptingString)
@@ -84,4 +90,6 @@ TEST_F(Simulate, RunNotAcceptingString)
     input.push_back("a");
     input.push_back("a");
     EXPECT_FALSE(a->Run(input));
+    EXPECT_TRUE(complementA->Run(input));
 }
+
