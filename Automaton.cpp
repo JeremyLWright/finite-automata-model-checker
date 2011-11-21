@@ -136,6 +136,8 @@ Automaton::Automaton(Automaton const & p)
             ++i)
     {
         states[i->first] = State::construct(i->second->Name());
+        states[i->first]->IsStart(i->second->IsStart());
+        states[i->first]->IsFinal(i->second->IsFinal());
         states[i->first]->transitions = i->second->transitions;
     }
 }

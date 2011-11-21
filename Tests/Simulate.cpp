@@ -90,6 +90,15 @@ TEST_F(Simulate, RunNotAcceptingString)
     input.push_back("a");
     input.push_back("a");
     EXPECT_FALSE(a->Run(input));
-    EXPECT_TRUE(complementA->Run(input));
+    EXPECT_FALSE(complementA->Run(input)); //This is also false, because it is a string not in the language.
+}
+
+TEST_F(Simulate, Epsilon)
+{
+    //Run the String a
+    list<string> input;
+    EXPECT_FALSE(a->Run(input));
+    EXPECT_TRUE(complementA->Run(input)); 
+
 }
 
