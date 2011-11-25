@@ -27,7 +27,7 @@ class Simulate : public ::testing::Test {
 
             a->SetStartState(0);
             a->AddFinalState(1);
-            complementA = ~(*a);
+            complementA = a->opComplement();
 
         }
 

@@ -1,4 +1,5 @@
 #include "Automaton.h"
+
 Automaton::Ptr Automaton::construct()
 {
     Automaton::Ptr c(new Automaton());
@@ -52,12 +53,12 @@ void Automaton::AddFinalState(int Name)
     states[Name]->IsFinal(true);
 }
 
-int Automaton::GetStartState()
+int Automaton::GetStartState() const
 {
-    State::Ptr s = states[startState];
-    if(s->IsStart())
+    map<int, State::Ptr>::const_iterator s = states.find(startState);
+    if((s->second)->IsStart())
     {
-        return s->Name(); 
+        return (s->second)->Name(); 
     }
     else
     {
@@ -65,7 +66,7 @@ int Automaton::GetStartState()
     }
 }
 
-list<int> Automaton::GetFinalStates()
+list<int> Automaton::GetFinalStates() const
 {
     list<int> finals;
     for(map<int, State::Ptr>::const_iterator f = states.begin();
@@ -100,25 +101,29 @@ Automaton::Ptr Automaton::operator~() const
     return b;
 }
 
-bool Automaton::Run(list<string> input)
+bool Automaton::Run(Sequence input) const
 {
     int currentState = GetStartState();
     for(list<string>::const_iterator t = input.begin();
             t != input.end();
             ++t)
     {
-     
-        State::Ptr tempState = states[currentState];
+        map<int, State::Ptr>::const_iterator s = states.find(currentState);
+        if(s == states.end())
+            throw std::exception();
+        
+        State::Ptr tempState = s->second;
         if(tempState->transitions.find(*t) == tempState->transitions.end())
         {
             return false; //There is no transition for the given input, reject
         }
         else
         {
-            currentState = states[currentState]->transitions[*t];
+            currentState = s->second->transitions[*t];
         }
     }
-    if(states[currentState]->IsFinal())
+    map<int, State::Ptr>::const_iterator s = states.find(currentState);
+    if(s->second->IsFinal())
     {
         return true;
     }
@@ -142,10 +147,15 @@ Automaton::Automaton(Automaton const & p)
     }
 }
 
-Automaton::Ptr intersect(Automaton::Ptr rhs) 
+Automaton::Ptr Automaton::opIntersect(Automaton::Ptr rhs) const 
 {
     Automaton::Ptr result = Automaton::construct();
+    return result;
+}
 
+Automaton::Ptr Automaton::opComplement() const
+{
+    return ~(*this);
 }
 
 ///////////////// State Class ////////////////////////////
@@ -169,7 +179,7 @@ Automaton::State::~State()
 }
 
 
-bool  Automaton::State::IsFinal()
+bool  Automaton::State::IsFinal() const
 {
     return isFinal;
 }
@@ -179,7 +189,7 @@ void  Automaton::State::IsFinal(bool b)
     isFinal = b;
 }
 
-bool  Automaton::State::IsStart()
+bool  Automaton::State::IsStart() const
 {
     return isStart;
 }
@@ -189,7 +199,7 @@ void  Automaton::State::IsStart(bool b)
     isStart = b;
 }
 
-int  Automaton::State::Name()
+int  Automaton::State::Name() const
 {
     return name;
 }

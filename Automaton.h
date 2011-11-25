@@ -5,7 +5,7 @@
  * Copyright Jeremy Wright (c) 2011
  * Creative Commons Attribution-ShareAlike 3.0 Unported License.
  */
-
+  
 #ifndef _AUTOMATON
 #define _AUTOMATON
 
@@ -21,6 +21,7 @@ public:
        
     typedef std::tr1::shared_ptr<Automaton> Ptr;
     typedef std::tr1::weak_ptr<Automaton> WeakPtr;
+    typedef list<string> Sequence; 
     static Automaton::Ptr construct();
     static Automaton::Ptr construct(Automaton::WeakPtr const copy);
     virtual ~Automaton();
@@ -28,13 +29,15 @@ public:
     void AddTransition(int FromNode, int ToNode, string label);
     void SetStartState(int Name);
     void AddFinalState(int Name);
-    bool Run(list<string> input);
-    int GetStartState();
-    list<int> GetFinalStates();
+    bool Run(Sequence input) const;
+    int GetStartState() const;
+    list<int> GetFinalStates() const;
+    ///Returns a List of sequences accepted by the state machine.
+    list<Sequence> FindPaths() const;
     // Implements complement!
-    Automaton::Ptr operator~() const;
     Automaton::Ptr opIntersect(Automaton::Ptr rhs) const;
     Automaton::Ptr opUnion(Automaton::Ptr rhs) const;
+    Automaton::Ptr opComplement() const;
     
 protected:
     Automaton (Automaton const & p);
@@ -45,11 +48,11 @@ protected:
         typedef std::tr1::shared_ptr<State> Ptr;
         typedef std::tr1::weak_ptr<State> WeakPtr;
         static Ptr construct(int Name);
-        bool IsStart();
+        bool IsStart() const;
         void IsStart(bool);
-        bool IsFinal();
+        bool IsFinal() const;
         void IsFinal(bool);
-        int Name();
+        int Name() const;
         void Name(int);
         virtual ~State();
         map<string, int> transitions;
@@ -67,6 +70,7 @@ protected:
 private:
     Automaton();
     Automaton::WeakPtr self;
+    Automaton::Ptr operator~() const;
     
 };
 
