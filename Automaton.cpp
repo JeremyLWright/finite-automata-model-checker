@@ -179,14 +179,14 @@ string Automaton::FindTransitionToState(int a, int b) const
             return r->first;
     }
 }
-bool Automaton::FindPath(int start, list<int>& result)
+bool Automaton::FindPath(int start, list<int>& result) const
 {
     if(find(result.begin(), result.end(), start) != result.end())
         return false;
 
     result.push_back(start);
 
-    if(states[start]->IsFinal())
+    if(states.find(start)->second->IsFinal())
         return true;
 
     list<int> adj = GetAdjecentStates(start);
@@ -202,7 +202,7 @@ bool Automaton::FindPath(int start, list<int>& result)
     return false;
 }
 
-bool Automaton::FindSequence(Sequence& acceptedSequence) 
+bool Automaton::FindSequence(Sequence& acceptedSequence) const 
 {
     list<int> acceptedPath;
     if(FindPath(startState, acceptedPath))
