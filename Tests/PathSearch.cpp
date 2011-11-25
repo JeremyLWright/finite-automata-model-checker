@@ -120,3 +120,23 @@ TEST_F(PathSearch, FindPath)
     }
 }
 
+TEST_F(PathSearch, FindSequence)
+{
+    list<string> AcceptingSequence;
+    list<string> ExpectedSequence;
+    ExpectedSequence.push_back("a");
+    ExpectedSequence.push_back("b");
+    ExpectedSequence.push_back("c");
+    ExpectedSequence.push_back("d");
+
+    a->FindSequence(AcceptingSequence);
+    EXPECT_FALSE(AcceptingSequence.empty());
+    list<string>::const_iterator j = ExpectedSequence.begin();
+    for(list<string>::const_iterator i = AcceptingSequence.begin();
+            i != AcceptingSequence.end();
+            ++i, ++j)
+    {
+        EXPECT_EQ(*j, *i);
+    }
+}
+

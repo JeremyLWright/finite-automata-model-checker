@@ -202,52 +202,23 @@ bool Automaton::FindPath(int start, list<int>& result)
     return false;
 }
 
-Automaton::Sequence Automaton::FindPath() const
+bool Automaton::FindSequence(Sequence& acceptedSequence) 
 {
-    list<int> visitedStates;
-    visitedStates.push_back(startState); //Mark the Start State as visited
-    stack<StateWithPath> S;
-    Sequence acceptedPath;
-    //Push all verticies adjacent to startState onto the stack
-    list<int> adj = GetAdjecentStates(startState);
-    for(list<int>::const_iterator i = adj.begin();
-            i != adj.end();
-            ++i)
+    list<int> acceptedPath;
+    if(FindPath(startState, acceptedPath))
     {
-        StateWithPath something;
-        something.state = *i; 
-        something.Path.push_back(startState);
-        S.push(something);
-    }
-
-    while(!(S.empty()))
-    {
-        StateWithPath w = S.top();
-        S.pop();
-        w.Path.push_back(w.state); //Update the path with the current move
-
-        list<int> adj = GetAdjecentStates(w.state);
-        for(list<int>::const_iterator u = adj.begin();
-                u != adj.end();
-                ++u)
+        list<int>::const_iterator nextState = acceptedPath.begin();
+        ++nextState; //Advance to the next state so its alwas ahead of currentState
+        for(list<int>::const_iterator currentState = acceptedPath.begin();
+                nextState != acceptedPath.end();
+                ++currentState, ++nextState)
         {
-            list<int>::const_iterator visitedItr = find(visitedStates.begin(), visitedStates.end(), *u);
-            if(visitedItr == visitedStates.end())
-            {
-                //u is not visited
-                //acceptedPath.push_back(FindTransitionToState(w.state,*u)); //Save this transition    
-                if(states.find(*u)->second->IsFinal())
-                {
-                    return acceptedPath;
-                }
-                visitedStates.push_back(*u);
-                //w.state = *u;
-                w.Path.push_back(w.state);
-                S.push(w);
-            }
+            acceptedSequence.push_back(FindTransitionToState(*currentState, *nextState));
         }
+        return true;
     }
-    return acceptedPath;
+    
+    return false;
 }
 
 Automaton::Ptr Automaton::opIntersect(Automaton::Ptr rhs) const 

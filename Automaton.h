@@ -33,7 +33,7 @@ public:
     int GetStartState() const;
     list<int> GetFinalStates() const;
     ///Returns a List of sequences accepted by the state machine.
-    Sequence FindPath() const;
+    bool FindSequence(Sequence& acceptedSequence);
     bool FindPath(int start, list<int>& result);
     // Implements complement!
     Automaton::Ptr opIntersect(Automaton::Ptr rhs) const;
