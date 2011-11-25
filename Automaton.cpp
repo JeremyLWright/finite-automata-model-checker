@@ -60,10 +60,7 @@ int Automaton::GetStartState() const
     {
         return (s->second)->Name(); 
     }
-    else
-    {
-        ///TODO throw no start state defined
-    }
+    throw std::exception();
 }
 
 list<int> Automaton::GetFinalStates() const
@@ -150,7 +147,17 @@ Automaton::Automaton(Automaton const & p)
 Automaton::Ptr Automaton::opIntersect(Automaton::Ptr rhs) const 
 {
     Automaton::Ptr result = Automaton::construct();
-    return result;
+    //a n b == !(!a u !b)
+    return (
+    (self.lock()->opComplement())->
+        opUnion(
+    rhs->opComplement())
+    )->opComplement();
+}
+
+Automaton::Ptr Automaton::opUnion(Automaton::Ptr rhs) const
+{
+   return rhs; 
 }
 
 Automaton::Ptr Automaton::opComplement() const

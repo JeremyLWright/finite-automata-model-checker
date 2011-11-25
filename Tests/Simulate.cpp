@@ -93,12 +93,22 @@ TEST_F(Simulate, RunNotAcceptingString)
     EXPECT_FALSE(complementA->Run(input)); //This is also false, because it is a string not in the language.
 }
 
-TEST_F(Simulate, Epsilon)
+TEST_F(Simulate, EmptyString)
 {
     //Run the String a
     list<string> input;
     EXPECT_FALSE(a->Run(input));
     EXPECT_TRUE(complementA->Run(input)); 
 
+}
+
+TEST_F(Simulate, Union)
+{
+    EXPECT_TRUE(false);
+}
+
+TEST_F(Simulate, Intersect)
+{
+    EXPECT_TRUE(false);
 }
 
