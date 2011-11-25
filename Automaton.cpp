@@ -1,4 +1,14 @@
 #include "Automaton.h"
+#include <stack>
+#include <algorithm>
+
+namespace {
+     struct StateWithPath {
+        list<int> Path;
+        int state;
+    };
+
+}
 
 Automaton::Ptr Automaton::construct()
 {
@@ -144,6 +154,102 @@ Automaton::Automaton(Automaton const & p)
     }
 }
 
+list<int> Automaton::GetAdjecentStates(int state) const
+{
+    list<int> adjecentStates;
+    map<int, State::Ptr>::const_iterator s = states.find(state);
+
+    for(map<string, int>::const_iterator i = s->second->transitions.begin();
+            i != s->second->transitions.end();
+            ++i)
+    {
+        adjecentStates.push_back(i->second);
+    }
+    return adjecentStates;
+}
+
+string Automaton::FindTransitionToState(int a, int b) const
+{
+    map<int, State::Ptr>::const_iterator s = states.find(a);
+    for(map<string, int>::const_iterator r = s->second->transitions.begin();
+            r != s->second->transitions.end();
+            ++r)
+    {
+        if(r->second == b)
+            return r->first;
+    }
+}
+bool Automaton::FindPath(int start, list<int>& result)
+{
+    if(find(result.begin(), result.end(), start) != result.end())
+        return false;
+
+    result.push_back(start);
+
+    if(states[start]->IsFinal())
+        return true;
+
+    list<int> adj = GetAdjecentStates(start);
+    for(list<int>::const_iterator itr = adj.begin();
+            itr != adj.end();
+            ++itr)
+    {
+        if(FindPath(*itr, result))
+            return true;
+    }
+
+    result.pop_back();
+    return false;
+}
+
+Automaton::Sequence Automaton::FindPath() const
+{
+    list<int> visitedStates;
+    visitedStates.push_back(startState); //Mark the Start State as visited
+    stack<StateWithPath> S;
+    Sequence acceptedPath;
+    //Push all verticies adjacent to startState onto the stack
+    list<int> adj = GetAdjecentStates(startState);
+    for(list<int>::const_iterator i = adj.begin();
+            i != adj.end();
+            ++i)
+    {
+        StateWithPath something;
+        something.state = *i; 
+        something.Path.push_back(startState);
+        S.push(something);
+    }
+
+    while(!(S.empty()))
+    {
+        StateWithPath w = S.top();
+        S.pop();
+        w.Path.push_back(w.state); //Update the path with the current move
+
+        list<int> adj = GetAdjecentStates(w.state);
+        for(list<int>::const_iterator u = adj.begin();
+                u != adj.end();
+                ++u)
+        {
+            list<int>::const_iterator visitedItr = find(visitedStates.begin(), visitedStates.end(), *u);
+            if(visitedItr == visitedStates.end())
+            {
+                //u is not visited
+                //acceptedPath.push_back(FindTransitionToState(w.state,*u)); //Save this transition    
+                if(states.find(*u)->second->IsFinal())
+                {
+                    return acceptedPath;
+                }
+                visitedStates.push_back(*u);
+                //w.state = *u;
+                w.Path.push_back(w.state);
+                S.push(w);
+            }
+        }
+    }
+    return acceptedPath;
+}
+
 Automaton::Ptr Automaton::opIntersect(Automaton::Ptr rhs) const 
 {
     Automaton::Ptr result = Automaton::construct();
@@ -157,7 +263,20 @@ Automaton::Ptr Automaton::opIntersect(Automaton::Ptr rhs) const
 
 Automaton::Ptr Automaton::opUnion(Automaton::Ptr rhs) const
 {
-   return rhs; 
+    //Connect all the Final States of a,
+    //to the start state of rhs
+    //Turn off the final states of a
+    int startRhs = rhs->GetStartState();
+    Automaton::Ptr c = Automaton::construct();
+    list<int> FinalStates = c->GetFinalStates();
+    for(list<int>::iterator i =  FinalStates.begin();
+        i != FinalStates.end();
+        ++i)
+    {
+        
+    }
+    
+    return rhs; 
 }
 
 Automaton::Ptr Automaton::opComplement() const

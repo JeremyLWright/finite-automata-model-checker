@@ -29,6 +29,24 @@ class Simulate : public ::testing::Test {
             a->AddFinalState(1);
             complementA = a->opComplement();
 
+            //Create a simple automaton
+            // ->0----a---->1--a--(2)
+            //              ^     |
+            //              ---b--
+            // Accepted Strings: aab*
+            b = Automaton::construct();
+            b->AddState(0);
+            b->AddState(1);
+            b->AddState(2);
+            
+            b->AddTransition(0,1,"a");
+            b->AddTransition(1,2,"a");
+            b->AddTransition(2,1,"b");
+
+            b->SetStartState(0);
+            b->AddFinalState(2);
+
+
         }
 
         virtual void TearDown()
@@ -36,6 +54,7 @@ class Simulate : public ::testing::Test {
         }
 
         Automaton::Ptr a;
+        Automaton::Ptr b;
         Automaton::Ptr complementA;
 };
 
@@ -104,7 +123,28 @@ TEST_F(Simulate, EmptyString)
 
 TEST_F(Simulate, Union)
 {
-    EXPECT_TRUE(false);
+    Automaton::Ptr c = a->opUnion(b);
+    //ab* u aab*
+    //Accept Strings
+    //aaa
+    //abbbaab
+
+    Automaton::Sequence s;
+    s.push_back("a");
+    s.push_back("a");
+    s.push_back("a");
+    
+    Automaton::Sequence t;
+    t.push_back("a");
+    t.push_back("b");
+    t.push_back("b");
+    t.push_back("b");
+    t.push_back("a");
+    t.push_back("a");
+    t.push_back("b");
+    
+    EXPECT_TRUE(c->Run(s));
+    EXPECT_TRUE(c->Run(t));
 }
 
 TEST_F(Simulate, Intersect)
