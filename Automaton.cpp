@@ -179,6 +179,7 @@ string Automaton::FindTransitionToState(int a, int b) const
             return r->first;
     }
 }
+// Reference: http://en.literateprograms.org/Depth-first_search_(C_Plus_Plus)
 bool Automaton::FindPath(int start, list<int>& result) const
 {
     if(find(result.begin(), result.end(), start) != result.end())
@@ -232,22 +233,34 @@ Automaton::Ptr Automaton::opIntersect(Automaton::Ptr rhs) const
     )->opComplement();
 }
 
-Automaton::Ptr Automaton::opUnion(Automaton::Ptr rhs) const
+Automaton::Ptr Automaton::opUnion(Automaton::Ptr const rhs) const
 {
-    //Connect all the Final States of a,
-    //to the start state of rhs
-    //Turn off the final states of a
-    int startRhs = rhs->GetStartState();
-    Automaton::Ptr c = Automaton::construct();
-    list<int> FinalStates = c->GetFinalStates();
-    for(list<int>::iterator i =  FinalStates.begin();
-        i != FinalStates.end();
-        ++i)
+    Automaton::Ptr u = Automaton::construct();
+    int const magicNumber = 9999;
+    for(map<int, State::Ptr>::const_iterator i = states.begin();
+            i != states.end();
+            ++i)
     {
-        
+        u->AddState(i->second->Name());
+        u->states[i->second->Name()]->IsFinal(i->second->IsFinal());
+        u->states[i->second->Name()]->transitions = i->second->transitions;
     }
     
-    return rhs; 
+    for(map<int, State::Ptr>::const_iterator i = rhs->states.begin();
+            i != rhs->states.end();
+            ++i)
+    {
+        u->AddState(i->second->Name());
+        u->states[i->second->Name()]->IsFinal(i->second->IsFinal());
+        u->states[i->second->Name()]->transitions = i->second->transitions;
+    }
+
+    u->AddState(magicNumber);
+    u->AddTransition(magicNumber, rhs->GetStartState(), "epislon");
+    u->AddTransition(magicNumber, self.lock()->GetStartState(), "epislon");
+    u->SetStartState(magicNumber);
+    //Run NFA to DFA on u
+    return u;
 }
 
 Automaton::Ptr Automaton::opComplement() const
