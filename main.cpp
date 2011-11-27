@@ -29,7 +29,7 @@ bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&)
 
 int main(int argc, const char *argv[])
 {
-    assert(argc == 2);
+    assert(argc >= 2);
     size_t const documentSize = bf::file_size(argv[1]);
     cout << "File is: " << bf::file_size(argv[1]) << " bytes." << endl;
 
@@ -63,7 +63,6 @@ int main(int argc, const char *argv[])
     {
         if(strncmp(node->name(), "state", sizeof("state")) == 0)
         {
-            cout << "Parsing a State";
             xml_attribute<>* attr = node->first_attribute();
             int StateId;
             from_string<int>(StateId, attr->value(), std::dec);
@@ -88,11 +87,28 @@ int main(int argc, const char *argv[])
         }
         else if(strncmp(node->name(), "transition", sizeof("transition")) == 0)
         {
-            cout << "Parsing a transition";
+            int fromId = 0;
+            int toId = 0;
+
+            from_string<int>(fromId, node->first_node("from")->value(), std::dec);
+            from_string<int>(toId, node->first_node("to")->value(), std::dec);
+            string read(node->first_node("read")->value());
+            cout << "Add Transition: " << fromId << " " << toId << " " << read << endl;
+            a->AddTransition(fromId, toId, read);
         }
     }
+
+    cout << "Document Complete." << endl;
+
+
+    list<string> input;
+    input.push_back("a");
+    input.push_back("b");
+    if( a->Run(input))
+    {
+        cout << "Accepted." << endl;
+    }
+
     delete xml_document_buffer;
-
-
     return 0;
 }
