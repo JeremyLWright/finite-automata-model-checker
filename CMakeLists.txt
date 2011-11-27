@@ -1,4 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+include(ExternalProject)
 project(CSE355ExtraCredit)
 Find_Package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -6,9 +7,19 @@ find_package(GTest)
 SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -ggdb -Wall ")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG ")
 include_directories(.)
-
+ExternalProject_Add(
+    RapidXML
+    URL http://downloads.sourceforge.net/project/rapidxml/rapidxml/rapidxml%201.13/rapidxml-1.13.zip
+    UPDATE_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+)
+ExternalProject_Get_Property(RapidXML SOURCE_DIR)
+include_directories(${SOURCE_DIR})
 set(PROJ_SOURCES Automaton.cpp)
 add_executable(simulator main.cpp ${PROJ_SOURCES})
+target_link_libraries(simulator boost_filesystem boost_system)
 
 if(GTEST_FOUND)
     ENABLE_TESTING()
