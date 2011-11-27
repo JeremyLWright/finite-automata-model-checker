@@ -17,9 +17,9 @@ ExternalProject_Add(
 )
 ExternalProject_Get_Property(RapidXML SOURCE_DIR)
 include_directories(${SOURCE_DIR})
-set(PROJ_SOURCES Automaton.cpp)
+set(PROJ_SOURCES Automaton.cpp JFLAP.cpp)
 add_executable(simulator main.cpp ${PROJ_SOURCES})
-target_link_libraries(simulator boost_filesystem boost_system)
+target_link_libraries(simulator boost_system boost_filesystem)
 
 if(GTEST_FOUND)
     ENABLE_TESTING()
@@ -30,7 +30,7 @@ if(GTEST_FOUND)
     
     #Mutex Version
     add_executable(test_automaton ${Test_Sources} ${PROJ_SOURCES})
-    target_link_libraries(test_automaton ${GTEST_BOTH_LIBRARIES} pthread)
+    target_link_libraries(test_automaton ${GTEST_BOTH_LIBRARIES} pthread  boost_system boost_filesystem)
     ADD_TEST(GTest ${CMAKE_CURRENT_BINARY_DIR}/test_automaton --gtest_output=xml)
 
 endif()
