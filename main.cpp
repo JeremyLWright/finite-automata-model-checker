@@ -6,36 +6,44 @@
  * Creative Commons Attribution-ShareAlike 3.0 Unported License.
  */
 
-#include "rapidxml.hpp"
-#include "rapidxml_print.hpp"
-#include "rapidxml_utils.hpp"
 #include <iostream>
-#include <fstream>
-#include <boost/filesystem.hpp>
 #include <stdint.h>
 #include <cassert>
 #include <sstream>
 #include "Automaton.h"
 #include "JFLAP.h"
-namespace bf = boost::filesystem;
 using namespace std;
-using namespace rapidxml;
+
+
 int main(int argc, const char *argv[])
 {
     assert(argc >= 2);
      
-    cout << "Document Complete." << endl;
-
     JFLAP::Ptr jflap = JFLAP::construct(argv[1]);
-    Automaton::Ptr a = jflap->GetAutomaton();
+    Automaton::Ptr specification = jflap->GetAutomaton();
+    
+    JFLAP::Ptr implInput = JFLAP::construct(argv[2]);
+    Automaton::Ptr implementation = implInput->GetAutomaton();
+
+    Automaton::Ptr lm = implementation->opIntersect(specification->opComplement());
 
     list<string> input;
-    input.push_back("a");
-    input.push_back("b");
-    if( a->Run(input))
+    if(lm->FindSequence(input))
     {
-        cout << "Accepted." << endl;
+        cout << "Found at least 1 path" << endl;
+        for(list<string>::const_iterator i = input.begin();
+                i != input.end();
+                ++i)
+        {
+            cout << *i << ", ";
+        }
+        cout << endl;
     }
+    else
+    {
+        cout << "Your model matches the specification, L(M)=EmptySet" << endl;
+    }
+
 
     return 0;
 }

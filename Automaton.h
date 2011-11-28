@@ -36,7 +36,7 @@ public:
     bool FindSequence(Sequence& acceptedSequence) const;
     bool FindPath(int start, list<int>& result) const;
     // Implements complement!
-    Automaton::Ptr opIntersect(Automaton::Ptr rhs) const;
+    Automaton::Ptr opIntersect(Automaton::Ptr const rhs) const;
     Automaton::Ptr opUnion(Automaton::Ptr const rhs) const;
     Automaton::Ptr opComplement() const;
     

@@ -222,7 +222,7 @@ bool Automaton::FindSequence(Sequence& acceptedSequence) const
     return false;
 }
 
-Automaton::Ptr Automaton::opIntersect(Automaton::Ptr rhs) const 
+Automaton::Ptr Automaton::opIntersect(Automaton::Ptr const rhs) const 
 {
     Automaton::Ptr result = Automaton::construct();
     //a n b == !(!a u !b)
