@@ -10,12 +10,8 @@
 #include "Automaton.h"
 
 class SystemLevel : public ::testing::Test {
+    friend class Automaton;
     protected:
-        //Create a simple automaton
-        // ->0----a---->(1)--b--
-        //              ^    |
-        //               -----
-        // Accepted Strings: ab*
         virtual void SetUp()
         {
             spec = Automaton::construct();
@@ -55,6 +51,9 @@ class SystemLevel : public ::testing::Test {
 TEST_F(SystemLevel, ComplementSpec)
 {
     Automaton::Ptr cspec = spec->opComplement();
+//    EXPECT_TRUE(cspec->states[0]->IsFinal())
+
+
     list<string> input;
     EXPECT_TRUE(cspec->Run(input));
     input.push_back("b");

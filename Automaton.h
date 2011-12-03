@@ -17,7 +17,9 @@
 using namespace std;
 class Automaton
 {
-public:
+friend class SystemLevel;
+friend class NFATests;
+    public:
        
     typedef std::tr1::shared_ptr<Automaton> Ptr;
     typedef std::tr1::weak_ptr<Automaton> WeakPtr;
@@ -31,15 +33,17 @@ public:
     void AddFinalState(int Name);
     bool Run(Sequence input) const;
     int GetStartState() const;
+    bool IsNFA() const;
     list<int> GetFinalStates() const;
     ///Returns a List of sequences accepted by the state machine.
     bool FindSequence(Sequence& acceptedSequence) const;
     bool FindPath(int start, list<int>& result) const;
-    // Implements complement!
+    void opSubsetConversion();
     Automaton::Ptr opIntersect(Automaton::Ptr const rhs) const;
     Automaton::Ptr opUnion(Automaton::Ptr const rhs) const;
     Automaton::Ptr opComplement() const;
-    
+    string const EPSILON; 
+    bool EpsilonClosure(int state, list<int>& closure) const;
 protected:
     list<int> GetAdjecentStates(int state) const;
     string FindTransitionToState(int a, int b) const;
@@ -58,7 +62,8 @@ protected:
         int Name() const;
         void Name(int);
         virtual ~State();
-        map<string, int> transitions;
+        list<int> GetTransitions(string) const;
+        multimap<string, int> transitions;
     private:
         bool isStart;
         bool isFinal;

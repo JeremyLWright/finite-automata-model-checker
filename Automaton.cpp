@@ -1,7 +1,8 @@
 #include "Automaton.h"
 #include <stack>
 #include <algorithm>
-
+#include <exception>
+#include <stdexcept>
 namespace {
      struct StateWithPath {
         list<int> Path;
@@ -25,7 +26,8 @@ Automaton::Ptr Automaton::construct(Automaton::WeakPtr const copy)
     return c;
 }
 
-Automaton::Automaton()
+Automaton::Automaton():
+    EPSILON("epsilon")
 {
 }
 
@@ -48,7 +50,10 @@ void Automaton::AddState(int Name)
 
 void Automaton::AddTransition(int FromNode, int ToNode, string label)
 {
-    states[FromNode]->transitions[label] = ToNode;
+  //  if(states[FromNode]->transitions.find(label) == states[FromNode]->transitions.end()) //If it doesn't exist;
+    //    states[FromNode]->transitions.insert(pair<string, int>(label, ToNode));
+   // else
+        states[FromNode]->transitions[label].push_back(ToNode);
 }
 
 void Automaton::SetStartState(int Name)
@@ -110,6 +115,10 @@ Automaton::Ptr Automaton::operator~() const
 
 bool Automaton::Run(Sequence input) const
 {
+    if(IsNFA())
+    {
+        throw logic_error("Cannot execute an NFA, please convert.");
+    }
     int currentState = GetStartState();
     for(list<string>::const_iterator t = input.begin();
             t != input.end();
@@ -126,7 +135,7 @@ bool Automaton::Run(Sequence input) const
         }
         else
         {
-            currentState = s->second->transitions[*t];
+            currentState = *(s->second->transitions[*t].begin());
         }
     }
     map<int, State::Ptr>::const_iterator s = states.find(currentState);
@@ -159,11 +168,14 @@ list<int> Automaton::GetAdjecentStates(int state) const
     list<int> adjecentStates;
     map<int, State::Ptr>::const_iterator s = states.find(state);
 
-    for(map<string, int>::const_iterator i = s->second->transitions.begin();
+    for(map<string, list<int> >::const_iterator i = s->second->transitions.begin();
             i != s->second->transitions.end();
             ++i)
     {
-        adjecentStates.push_back(i->second);
+        for(list<int>::const_iterator stateItr = i->second.begin();
+                stateItr != i->second.end();
+                ++stateItr)
+            adjecentStates.push_back(*stateItr);
     }
     return adjecentStates;
 }
@@ -171,13 +183,14 @@ list<int> Automaton::GetAdjecentStates(int state) const
 string Automaton::FindTransitionToState(int a, int b) const
 {
     map<int, State::Ptr>::const_iterator s = states.find(a);
-    for(map<string, int>::const_iterator r = s->second->transitions.begin();
+    for(map<string, list<int> >::const_iterator r = s->second->transitions.begin();
             r != s->second->transitions.end();
             ++r)
     {
-        if(r->second == b)
+        if(find(r->second.begin(), r->second.end(), b) != r->second.end())
             return r->first;
     }
+    return "";
 }
 // Reference: http://en.literateprograms.org/Depth-first_search_(C_Plus_Plus)
 bool Automaton::FindPath(int start, list<int>& result) const
@@ -268,6 +281,60 @@ Automaton::Ptr Automaton::opComplement() const
     return ~(*this);
 }
 
+bool Automaton::IsNFA() const
+{
+    for(map<int, State::Ptr>::const_iterator stateItr = states.begin();
+            stateItr != states.end();
+            ++stateItr)
+    {
+        for(map<string, list<int> >::const_iterator transitionsItr = stateItr->second->transitions.begin();
+                transitionsItr != stateItr->second->transitions.end();
+                ++transitionsItr)
+        {
+            if(transitionsItr->second.size() > 1)
+                return true;
+            else if(transitionsItr->first == EPSILON)
+                return true;
+        }
+    }
+    return false;
+}
+
+bool Automaton::EpsilonClosure(int state, list<int>& closure) const
+{
+    if(find(closure.begin(), closure.end(), state) != closure.end())
+        return false;
+
+    closure.push_back(state);
+
+    //Goal is no more epsilon transitions
+    State::Ptr workingState = states.find(state)->second;
+    list<int> epsilons = workingState->GetTransitions(EPSILON);
+    if(epsilons.size() == 0)
+        return true;
+    
+    for(list<int>::const_iterator itr = epsilons.begin();
+            itr != epsilons.end();
+            ++itr)
+    {
+        EpsilonClosure(*itr, closure);
+    }
+
+//    closure.pop_back();
+    return true;
+    
+}
+
+void Automaton::opSubsetConversion()
+{
+    typedef int StateName;
+    typedef string TransitionName;
+
+    map<StateName, map<TransitionName, StateName> > transitionTable;
+
+
+
+}
 ///////////////// State Class ////////////////////////////
 
 Automaton::State::Ptr  Automaton::State::construct(int Name)
@@ -275,6 +342,14 @@ Automaton::State::Ptr  Automaton::State::construct(int Name)
     Automaton::State::Ptr c(new Automaton::State(Name));
     c->self = c;
     return c;
+}
+
+list<int> Automaton::State::GetTransitions(string label) const
+{
+    list<int>::const_iterator a = transitions.find(label)->second.begin();
+    list<int>::const_iterator b = transitions.find(label)->second.end();
+    list<int> trans(a,b);
+    return trans;
 }
 
 Automaton::State::State(int Name):
