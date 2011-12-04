@@ -12,18 +12,26 @@
 #include <sstream>
 #include "Automaton.h"
 #include "JFLAP.h"
+
 using namespace std;
 
 
 int main(int argc, const char *argv[])
 {
-    assert(argc >= 2);
+    if(argc != 3)
+    {
+        cout << "Usage: " << endl;
+        cout << argv[0] << " Specification.jff Model.jff" << endl;
+        return -1;
+    }
      
-    JFLAP::Ptr jflap = JFLAP::construct(argv[1]);
+    JFLAP* jflap = new JFLAP(argv[1]);
     Automaton::Ptr specification = jflap->GetAutomaton();
-    
-    JFLAP::Ptr implInput = JFLAP::construct(argv[2]);
+    delete jflap;
+
+    JFLAP* implInput = new JFLAP(argv[2]);
     Automaton::Ptr implementation = implInput->GetAutomaton();
+    delete implInput;
 
     Automaton::Ptr lm = implementation->opIntersect(specification->opComplement());
 

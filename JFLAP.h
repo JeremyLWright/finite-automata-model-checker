@@ -13,17 +13,11 @@
 class JFLAP
 {
 public:
-    typedef std::tr1::shared_ptr<JFLAP> Ptr;
-    typedef std::tr1::weak_ptr<JFLAP> WeakPtr;
-    static JFLAP::Ptr construct(string filename);
     Automaton::Ptr GetAutomaton() const;
-    static void OutputAutomaton(Automaton::Ptr automaton, string filename);
+    JFLAP(string filename);
     virtual ~JFLAP();
 private:
     Automaton::Ptr a;
-    char* xml_document_buffer;
-    JFLAP(string filename);
-    JFLAP::WeakPtr self;
     
 };
 

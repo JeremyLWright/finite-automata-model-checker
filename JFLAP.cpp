@@ -36,20 +36,20 @@ JFLAP::JFLAP(string filename)
     size_t const documentSize = bf::file_size(filename);    
     cout << "File is: " << bf::file_size(filename) << " bytes." << endl;
 
-    xml_document_buffer = new char[documentSize];
+    char* xml_document_buffer = new char[documentSize];
     ifstream inputFile(filename.c_str());
     inputFile.read(xml_document_buffer, documentSize);
     
-    rapidxml::xml_document<> doc;
-    doc.parse<0>(xml_document_buffer);
+    rapidxml::xml_document<>* doc = new rapidxml::xml_document<>;
+    doc->parse<0>(xml_document_buffer);
 
     //Verify the correct JFLAP input file
-    if(strncmp(doc.first_node()->first_node()->value(), "fa", sizeof("fa")))
+    if(strncmp(doc->first_node()->first_node()->value(), "fa", sizeof("fa")))
     {
         cerr << "JFLAP file must be a Finite Automaton." << endl;
         //TODO throw exception
     }
-    xml_node<>* automatonStart = doc.first_node()->first_node()->next_sibling();
+    xml_node<>* automatonStart = doc->first_node()->first_node()->next_sibling();
 
     //Verify the file is in the expected format.
     if(strncmp(automatonStart->name(), "automaton", sizeof("automaton")))
@@ -102,18 +102,12 @@ JFLAP::JFLAP(string filename)
         }
     }
 
+    delete xml_document_buffer;
+
 }
 
 JFLAP::~JFLAP()
 {
-    delete xml_document_buffer;
-}
-
-JFLAP::Ptr JFLAP::construct(string filename)
-{
-    JFLAP::Ptr c(new JFLAP(filename));
-    c->self = c;
-    return c;
 }
 
 Automaton::Ptr JFLAP::GetAutomaton() const
@@ -121,7 +115,3 @@ Automaton::Ptr JFLAP::GetAutomaton() const
     return a;
 }
 
-void OutputAutomaton(Automaton::Ptr automaton, string filename)
-{
-
-}
