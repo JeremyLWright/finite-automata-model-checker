@@ -50,7 +50,8 @@ void Automaton::AddState(int Name)
 
 void Automaton::AddTransition(int FromNode, int ToNode, string label)
 {
-    states[FromNode]->transitions.insert( pair<string, int>(label, ToNode));
+    State::Ptr workingState = states[FromNode];
+    workingState->transitions.insert( pair<string, int>(label, ToNode));
 }
 
 void Automaton::SetStartState(int Name)
@@ -304,10 +305,12 @@ bool Automaton::EpsilonClosure(int state, list<int>& closure) const
             itr != epsilons.end();
             ++itr)
     {
-        EpsilonClosure(*itr, closure);
+        if(EpsilonClosure(*itr, closure) == false)
+        {
+            closure.pop_back();
+        }
     }
 
-//    closure.pop_back();
     return true;
     
 }

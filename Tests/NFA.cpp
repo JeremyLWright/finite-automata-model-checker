@@ -64,11 +64,13 @@ TEST_F(NFATests, EpsilonClosure2)
     incomplete->AddState(1);
     incomplete->AddState(2);
     incomplete->AddState(3);
+    incomplete->AddState(4);
 
     incomplete->AddTransition(1,2,incomplete->EPSILON);
     incomplete->AddTransition(1,3,incomplete->EPSILON);
+    incomplete->AddTransition(3,4,"b");
 
-    NFATest_EpsilonSize(incomplete, 2);
+    //NFATest_EpsilonSize(incomplete, 2);
 
     
     list<int> expectedClosure;
@@ -77,9 +79,9 @@ TEST_F(NFATests, EpsilonClosure2)
     expectedClosure.push_back(3);
 
     list<int> calcClosure;
-    bookProblem->EpsilonClosure(1, calcClosure);
+    incomplete->EpsilonClosure(1, calcClosure);
     calcClosure.sort();
-    
+    EXPECT_EQ(expectedClosure.size(), calcClosure.size());
     list<int>::const_iterator c = calcClosure.begin();
     for(list<int>::const_iterator e = expectedClosure.begin();
             e != expectedClosure.end();
