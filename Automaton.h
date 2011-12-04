@@ -13,14 +13,44 @@
 #include <list>
 #include <tr1/memory>
 #include <string>
-
+#include <set>
+#include <sstream>
+#include <vector>
 using namespace std;
 class Automaton
 {
 friend class SystemLevel;
 friend class NFATests;
+    protected:    
+class State
+    {
     public:
-       
+        typedef std::tr1::shared_ptr<State> Ptr;
+        typedef std::tr1::weak_ptr<State> WeakPtr;
+        void AddTransition(string label, State::Ptr ToNode);
+        static Ptr construct(int Name);
+        static Ptr construct(int Name, set<State::Ptr> NFAStates);
+        bool IsStart() const;
+        void IsStart(bool);
+        bool IsFinal() const;
+        void IsFinal(bool);
+        int Name() const;
+        void Name(int);
+        virtual ~State();
+        set<int> GetTransitions(string) const;
+        multimap<string, int> transitions;
+        set<State::Ptr> NFAStates() const;
+    private:
+        bool isStart;
+        bool isFinal;
+        int name;
+        set<State::Ptr> nfaStates;
+        State(int Name);
+        State(int Name, set<Ptr> NFAStates);
+        State::WeakPtr self;
+    };
+     
+    public:
     typedef std::tr1::shared_ptr<Automaton> Ptr;
     typedef std::tr1::weak_ptr<Automaton> WeakPtr;
     typedef list<string> Sequence; 
@@ -38,42 +68,24 @@ friend class NFATests;
     ///Returns a List of sequences accepted by the state machine.
     bool FindSequence(Sequence& acceptedSequence) const;
     bool FindPath(int start, list<int>& result) const;
-    void opSubsetConversion();
+    Automaton::Ptr opSubsetConversion() const;
     Automaton::Ptr opIntersect(Automaton::Ptr const rhs) const;
     Automaton::Ptr opUnion(Automaton::Ptr const rhs) const;
     Automaton::Ptr opComplement() const;
+    void Move(string label, set<State::Ptr> NFAState, set<State::Ptr>& result) const;
     string const EPSILON; 
-    bool EpsilonClosure(int state, list<int>& closure) const;
 protected:
+    set<string> Alphabet;
     list<int> GetAdjecentStates(int state) const;
     string FindTransitionToState(int a, int b) const;
     Automaton (Automaton const & p);
     Automaton operator=(Automaton const &);
- class State
-    {
-    public:
-        typedef std::tr1::shared_ptr<State> Ptr;
-        typedef std::tr1::weak_ptr<State> WeakPtr;
-        static Ptr construct(int Name);
-        bool IsStart() const;
-        void IsStart(bool);
-        bool IsFinal() const;
-        void IsFinal(bool);
-        int Name() const;
-        void Name(int);
-        virtual ~State();
-        list<int> GetTransitions(string) const;
-        multimap<string, int> transitions;
-    private:
-        bool isStart;
-        bool isFinal;
-        int name;
-        State(int Name);
-        State::WeakPtr self;
-    };
-    
+
+    void AddState(State::Ptr State);
     int startState;
     map<int, State::Ptr> states;
+    bool EpsilonClosure(set<State::Ptr>, set<State::Ptr>& states) const;
+    bool EpsilonClosure(int state, set<State::Ptr>& closure) const;
     
 private:
     Automaton();
@@ -81,5 +93,16 @@ private:
     Automaton::Ptr operator~() const;
     
 };
+
+
+namespace {
+template <typename T>
+bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&))
+{
+        std::istringstream iss(s, std::istringstream::in);
+        return !(iss >> f >> t).fail();
+}
+
+}
 
 #endif /* end of include guard: _AUTOMATON */

@@ -48,10 +48,24 @@ void Automaton::AddState(int Name)
 
 }
 
+void Automaton::AddState(State::Ptr State)
+{
+    if(states.find(State->Name()) == states.end())
+    {
+        states[State->Name()] = State;
+    }
+    else
+    {
+        throw State;
+    }
+}
+
 void Automaton::AddTransition(int FromNode, int ToNode, string label)
 {
     State::Ptr workingState = states[FromNode];
     workingState->transitions.insert( pair<string, int>(label, ToNode));
+    if(label != EPSILON)
+        Alphabet.insert(label);
 }
 
 void Automaton::SetStartState(int Name)
@@ -288,43 +302,151 @@ bool Automaton::IsNFA() const
     return false;
 }
 
-bool Automaton::EpsilonClosure(int state, list<int>& closure) const
+bool Automaton::EpsilonClosure(set<State::Ptr> startSet, set<State::Ptr>& closure) const
 {
-    if(find(closure.begin(), closure.end(), state) != closure.end())
+    for(set<State::Ptr>::const_iterator setItr = startSet.begin();
+            setItr != startSet.end();
+            ++setItr)
+    {
+        EpsilonClosure((*setItr)->Name(), closure);
+    }
+    return true;
+}
+
+bool Automaton::EpsilonClosure(int state, set<State::Ptr>& closure) const
+{
+    if(find(closure.begin(), closure.end(), states.at(state)) != closure.end())
         return false;
 
-    closure.push_back(state);
 
     //Goal is no more epsilon transitions
     State::Ptr workingState = states.find(state)->second;
-    list<int> epsilons = workingState->GetTransitions(EPSILON);
+    closure.insert(workingState);
+    set<int> epsilons = workingState->GetTransitions(EPSILON);
     if(epsilons.size() == 0)
         return true;
+
+    set<State::Ptr> sepsilons;
+    for(set<int>::const_iterator i = epsilons.begin();
+            i != epsilons.end();
+            ++i)
+    {
+        sepsilons.insert(states.at(*i));
+    }
     
-    for(list<int>::const_iterator itr = epsilons.begin();
-            itr != epsilons.end();
+    for(set<State::Ptr>::const_iterator itr = sepsilons.begin();
+            itr != sepsilons.end();
             ++itr)
     {
-        if(EpsilonClosure(*itr, closure) == false)
+        if(EpsilonClosure((*itr)->Name(), closure) == false)
         {
-            closure.pop_back();
+            closure.erase(workingState);
         }
     }
 
-    return true;
-    
+    return true;   
 }
 
-void Automaton::opSubsetConversion()
+Automaton::Ptr Automaton::opSubsetConversion() const
 {
     typedef int StateName;
     typedef string TransitionName;
+    int id;
+    State::Ptr DFAStartState = states.at(startState);
+    set<State::Ptr> NFAStartStateSet;
+    NFAStartStateSet.insert(DFAStartState);
+    
+    set<State::Ptr> DFAStartStateSet;
+    EpsilonClosure(NFAStartStateSet, DFAStartStateSet);
 
-    map<StateName, map<TransitionName, StateName> > transitionTable;
+    vector<State::Ptr> DFATable;
+    DFATable.push_back(DFAStartState);
+
+    vector<State::Ptr> unvisitedStates;
+    unvisitedStates.push_back(DFAStartState);
+
+    while(!unvisitedStates.empty())
+    {
+        State::Ptr CurDFAState = unvisitedStates[unvisitedStates.size()-1];
+        unvisitedStates.pop_back();
+
+        for(set<string>::const_iterator itr = Alphabet.begin();
+                itr != Alphabet.end();
+                ++itr)
+        {
+            bool found = false;
+            set<State::Ptr> moveRes;
+            set<State::Ptr> epsilonClosureRes;
+            Move(*itr, CurDFAState->NFAStates(), moveRes);
+            EpsilonClosure(moveRes, epsilonClosureRes);
 
 
+            set<State::Ptr>::const_iterator moveResItr;
+            set<State::Ptr>::const_iterator epsilonCloResItr;
 
+            State::Ptr s ;
+            for(vector<State::Ptr>::const_iterator i = DFATable.begin(); 
+                    i != DFATable.end();
+                    ++i)
+            {
+                s = *i;
+                if(s->NFAStates() == epsilonClosureRes)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if(!found)
+            {
+                State::Ptr U = State::construct(id++, epsilonClosureRes);
+                unvisitedStates.push_back(U);
+                DFATable.push_back(U);
+                CurDFAState->AddTransition(*itr, U);
+            }
+            else
+            {
+                CurDFAState->AddTransition(*itr, s);
+            }
+
+
+        }
+    }
+
+    
 }
+#if 0
+int Automaton::ConvertStateName(list<int> stateList) const
+{
+    stringstream ss;
+    for(list<int>::const_iterator i = stateList.begin();
+            i != stateList.end();
+            ++i)
+    {
+        ss << *i;
+    }
+    string s = ss.str();
+    int value;
+    from_string<int>(value, s, std::dec);
+    return value;
+}
+#endif
+void Automaton::Move(string label, set<State::Ptr> NFAState, set<State::Ptr>& result) const
+{
+    for(set<State::Ptr>::const_iterator itr = NFAState.begin();
+            itr != NFAState.end();
+            ++itr)
+    {
+        set<int> trans = (*itr)->GetTransitions(label);
+        for(set<int>::const_iterator jtr = trans.begin();
+                jtr != trans.end();
+                ++jtr)
+        {
+            result.insert(states.at(*jtr));
+        }
+    }
+}
+
 ///////////////// State Class ////////////////////////////
 
 Automaton::State::Ptr  Automaton::State::construct(int Name)
@@ -334,13 +456,20 @@ Automaton::State::Ptr  Automaton::State::construct(int Name)
     return c;
 }
 
-list<int> Automaton::State::GetTransitions(string label) const
+Automaton::State::Ptr Automaton::State::construct(int Name, set<State::Ptr> NFAStates)
 {
-    list<int> trans;
+    Automaton::State::Ptr c(new Automaton::State(Name, NFAStates));
+    c->self = c;
+    return c;
+}
+
+set<int> Automaton::State::GetTransitions(string label) const
+{
+    set<int> trans;
     for(multimap<string, int>::const_iterator it = transitions.equal_range(label).first;
             it != transitions.equal_range(label).second;
             ++it)
-        trans.push_back(it->second);
+        trans.insert(it->second);
 
     return trans;
 }
@@ -351,6 +480,34 @@ Automaton::State::State(int Name):
     name(Name)
 {
 }
+void Automaton::State::AddTransition(string label, State::Ptr ToNode)
+{
+    State::Ptr workingState = self.lock();
+    workingState->transitions.insert( pair<string, int>(label, ToNode->Name()));
+}
+
+Automaton::State::State(int Name, set<State::Ptr> NFAStates):
+    isStart(false),
+    isFinal(false),
+    name(Name),
+    nfaStates(NFAStates)
+{
+    for(set<State::Ptr>::const_iterator itr = NFAStates.begin();
+            itr != NFAStates.end();
+            ++itr)
+    {
+        if((*itr)->IsFinal())
+        {
+            IsFinal(true);
+        } 
+    }
+}
+
+set<Automaton::State::Ptr> Automaton::State::NFAStates() const
+{
+    return nfaStates;
+}
+
 
 Automaton::State::~State()
 {

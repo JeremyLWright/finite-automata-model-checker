@@ -21,15 +21,6 @@ namespace bf = boost::filesystem;
 using namespace std;
 using namespace rapidxml;
 
-namespace {
-template <typename T>
-bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&))
-{
-        std::istringstream iss(s, std::istringstream::in);
-        return !(iss >> f >> t).fail();
-}
-
-}
 
 JFLAP::JFLAP(string filename)
 {
