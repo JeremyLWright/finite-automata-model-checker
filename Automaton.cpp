@@ -2,7 +2,7 @@
 #include <stack>
 #include <algorithm>
 #include <sstream>
-
+#include <iostream>
 namespace {
     Automaton::StateName_t IntToStateName(int Name)
     {
@@ -66,7 +66,6 @@ void Automaton::AddTransition(StateName_t FromNode, StateName_t ToNode, string l
 
 void Automaton::SetStartState(StateName_t Name)
 {
-    startState = Name;
     states[Name]->IsStart(true);
     ///TODO throw an exceptions if there is already a start state.
 }
@@ -89,11 +88,16 @@ void Automaton::AddFinalState(int Name)
 
 Automaton::StateName_t Automaton::GetStartState() const
 {
-    map<StateName_t, State::Ptr>::const_iterator s = states.find(startState);
-    if((s->second)->IsStart())
+    for(map<StateName_t, State::Ptr>::const_iterator s = states.begin();
+            s != states.end();
+            ++s)
     {
-        return (s->second)->Name(); 
+        if((s->second)->IsStart())
+        {
+            return (s->second)->Name(); 
+        }
     }
+
     throw std::exception();
 }
 
@@ -114,6 +118,34 @@ list<Automaton::StateName_t> Automaton::GetFinalStates() const
     } 
     return finals;
 }
+
+void Automaton::PrettyPrint() const
+{
+    Automaton::Ptr a = self.lock();
+    for(map<Automaton::StateName_t, Automaton::State::Ptr>::const_iterator stateItr = a->states.begin();
+            stateItr != a->states.end();
+            ++stateItr)
+    {
+        State::Ptr workingState = stateItr->second;
+        if(workingState->IsStart() && workingState->IsFinal())
+            cout << "Name: " << "->(" << stateItr->first << ")" << endl;
+        else if(workingState->IsStart())
+            cout << "Name: " << "->" << stateItr->first << endl;
+        else if(workingState->IsFinal())
+            cout << "Name: " << "(" << stateItr->first << ")" << endl;
+        else
+            cout << "Name: " << stateItr->first << endl;
+
+
+        for(map<string, Automaton::StateName_t>::const_iterator tranItr = (stateItr->second)->transitions.begin();
+                tranItr != (stateItr->second)->transitions.end();
+                ++tranItr)
+        {
+            cout << "\t" << "T: " << tranItr->first << " -> " << tranItr->second << endl;
+        }
+    }
+}
+
 
 
 Automaton::Ptr Automaton::operator~() const
@@ -142,7 +174,7 @@ bool Automaton::Run(Sequence input) const
         map<StateName_t, State::Ptr>::const_iterator s = states.find(currentState);
         if(s == states.end())
             throw std::exception();
-        
+
         State::Ptr tempState = s->second;
         if(tempState->transitions.find(*t) == tempState->transitions.end())
         {
@@ -166,7 +198,6 @@ bool Automaton::Run(Sequence input) const
 
 Automaton::Automaton(Automaton const & p)
 {
-    startState = p.startState;
     for(map<StateName_t, State::Ptr>::const_iterator i = p.states.begin();
             i != p.states.end();
             ++i)
@@ -231,7 +262,7 @@ bool Automaton::FindPath(StateName_t start, list<StateName_t>& result) const
 bool Automaton::FindSequence(Sequence& acceptedSequence) const 
 {
     list<StateName_t> acceptedPath;
-    if(FindPath(startState, acceptedPath))
+    if(FindPath(GetStartState(), acceptedPath))
     {
         list<StateName_t>::const_iterator nextState = acceptedPath.begin();
         ++nextState; //Advance to the next state so its alwas ahead of currentState

@@ -18,7 +18,6 @@ using namespace std;
 class Automaton
 {
 public:
-    friend class IntersectTests; 
     typedef string StateName_t;
     typedef string Label_t;
     typedef std::tr1::shared_ptr<Automaton> Ptr;
@@ -35,6 +34,7 @@ public:
     void AddFinalState(int Name);
     void SetStartState(StateName_t Name);
     void AddFinalState(StateName_t Name);
+    void PrettyPrint() const;
     bool Run(Sequence input) const;
     StateName_t GetStartState() const;
     list<StateName_t> GetFinalStates() const;
@@ -75,7 +75,6 @@ protected:
         State::WeakPtr self;
     };
     
-    StateName_t startState;
     map<StateName_t, State::Ptr> states;
     
 private:
