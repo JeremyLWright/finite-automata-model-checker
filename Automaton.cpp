@@ -50,10 +50,7 @@ void Automaton::AddState(int Name)
 
 void Automaton::AddTransition(int FromNode, int ToNode, string label)
 {
-  //  if(states[FromNode]->transitions.find(label) == states[FromNode]->transitions.end()) //If it doesn't exist;
-    //    states[FromNode]->transitions.insert(pair<string, int>(label, ToNode));
-   // else
-        states[FromNode]->transitions[label].push_back(ToNode);
+    states[FromNode]->transitions.insert( pair<string, int>(label, ToNode));
 }
 
 void Automaton::SetStartState(int Name)
@@ -135,7 +132,7 @@ bool Automaton::Run(Sequence input) const
         }
         else
         {
-            currentState = *(s->second->transitions[*t].begin());
+            currentState = s->second->transitions.find(*t)->second;
         }
     }
     map<int, State::Ptr>::const_iterator s = states.find(currentState);
@@ -168,14 +165,11 @@ list<int> Automaton::GetAdjecentStates(int state) const
     list<int> adjecentStates;
     map<int, State::Ptr>::const_iterator s = states.find(state);
 
-    for(map<string, list<int> >::const_iterator i = s->second->transitions.begin();
+    for(multimap<string, int>::const_iterator i = s->second->transitions.begin();
             i != s->second->transitions.end();
             ++i)
     {
-        for(list<int>::const_iterator stateItr = i->second.begin();
-                stateItr != i->second.end();
-                ++stateItr)
-            adjecentStates.push_back(*stateItr);
+        adjecentStates.push_back(i->second);
     }
     return adjecentStates;
 }
@@ -183,11 +177,11 @@ list<int> Automaton::GetAdjecentStates(int state) const
 string Automaton::FindTransitionToState(int a, int b) const
 {
     map<int, State::Ptr>::const_iterator s = states.find(a);
-    for(map<string, list<int> >::const_iterator r = s->second->transitions.begin();
+    for(multimap<string, int>::const_iterator r = s->second->transitions.begin();
             r != s->second->transitions.end();
             ++r)
     {
-        if(find(r->second.begin(), r->second.end(), b) != r->second.end())
+        if(r->second == b)
             return r->first;
     }
     return "";
@@ -287,15 +281,8 @@ bool Automaton::IsNFA() const
             stateItr != states.end();
             ++stateItr)
     {
-        for(map<string, list<int> >::const_iterator transitionsItr = stateItr->second->transitions.begin();
-                transitionsItr != stateItr->second->transitions.end();
-                ++transitionsItr)
-        {
-            if(transitionsItr->second.size() > 1)
-                return true;
-            else if(transitionsItr->first == EPSILON)
-                return true;
-        }
+        if(stateItr->second->transitions.count(EPSILON) != 0)
+            return true;
     }
     return false;
 }
@@ -346,9 +333,12 @@ Automaton::State::Ptr  Automaton::State::construct(int Name)
 
 list<int> Automaton::State::GetTransitions(string label) const
 {
-    list<int>::const_iterator a = transitions.find(label)->second.begin();
-    list<int>::const_iterator b = transitions.find(label)->second.end();
-    list<int> trans(a,b);
+    list<int> trans;
+    for(multimap<string, int>::const_iterator it = transitions.equal_range(label).first;
+            it != transitions.equal_range(label).second;
+            ++it)
+        trans.push_back(it->second);
+
     return trans;
 }
 

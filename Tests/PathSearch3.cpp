@@ -22,7 +22,7 @@ class PathSearch3 : public ::testing::Test {
         //          z      k      k       k
         //          |      |      |       |
         //          10--z->11--z->12--z->13
-        // Accepted String: abcd
+        // Accepted String: abcy
         virtual void SetUp()
         {
             a = Automaton::construct();

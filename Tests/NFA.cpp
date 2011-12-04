@@ -41,7 +41,7 @@ class NFATests : public ::testing::Test {
 
         void NFATest_EpsilonSize(Automaton::Ptr g, size_t size)
         {
-            EXPECT_EQ(size, g->states[1]->transitions[g->EPSILON].size());
+            EXPECT_EQ(size, g->states[1]->transitions.count(g->EPSILON));
         }
 
         Automaton::Ptr bookProblem;
