@@ -3,13 +3,7 @@
 #include <algorithm>
 #include <exception>
 #include <stdexcept>
-namespace {
-     struct StateWithPath {
-        list<int> Path;
-        int state;
-    };
-
-}
+#include <iostream>
 
 Automaton::Ptr Automaton::construct()
 {
@@ -302,15 +296,30 @@ bool Automaton::IsNFA() const
     return false;
 }
 
+bool Automaton::EpsilonClosure(int startState, set<int>& states) const
+{
+    set<State::Ptr> intermediate;
+    bool v = EpsilonClosure(startState, intermediate);
+    for(set<State::Ptr>::const_iterator itr = intermediate.begin();
+            itr != intermediate.end();
+            ++itr)
+    {
+        states.insert((*itr)->Name());
+    }
+    return v;
+}
+
 bool Automaton::EpsilonClosure(set<State::Ptr> startSet, set<State::Ptr>& closure) const
 {
+    bool value = true;
     for(set<State::Ptr>::const_iterator setItr = startSet.begin();
             setItr != startSet.end();
             ++setItr)
     {
-        EpsilonClosure((*setItr)->Name(), closure);
+        if(EpsilonClosure((*setItr)->Name(), closure) == false)
+            value = false;
     }
-    return true;
+    return value;
 }
 
 bool Automaton::EpsilonClosure(int state, set<State::Ptr>& closure) const
@@ -345,6 +354,22 @@ bool Automaton::EpsilonClosure(int state, set<State::Ptr>& closure) const
     }
 
     return true;   
+}
+void Automaton::PrettyPrint(vector<State::Ptr> const & table) const
+{
+    cout << "DFA Converstion Table:" << endl;
+    for(vector<State::Ptr>::const_iterator stateItr = table.begin();
+            stateItr != table.end();
+            ++stateItr)
+    {
+        cout << "Name: " << (*stateItr)->Name() << endl;
+        for(multimap<string, int>::const_iterator tranItr = (*stateItr)->transitions.begin();
+                tranItr != (*stateItr)->transitions.end();
+                ++tranItr)
+        {
+            cout << "\t" << "T: " << tranItr->first << " : " << tranItr->second << endl;
+        }
+    }
 }
 
 Automaton::Ptr Automaton::opSubsetConversion() const
@@ -412,9 +437,11 @@ Automaton::Ptr Automaton::opSubsetConversion() const
 
         }
     }
-
     
+    PrettyPrint(DFATable);
+    return Automaton::construct(); 
 }
+
 #if 0
 int Automaton::ConvertStateName(list<int> stateList) const
 {

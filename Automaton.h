@@ -74,34 +74,36 @@ class State
     Automaton::Ptr opComplement() const;
     void Move(string label, set<State::Ptr> NFAState, set<State::Ptr>& result) const;
     string const EPSILON; 
+    bool EpsilonClosure(int startState, set<int>& states) const;
 protected:
     set<string> Alphabet;
     list<int> GetAdjecentStates(int state) const;
     string FindTransitionToState(int a, int b) const;
     Automaton (Automaton const & p);
     Automaton operator=(Automaton const &);
+    void PrettyPrint(vector<State::Ptr> const & table) const;
 
     void AddState(State::Ptr State);
     int startState;
     map<int, State::Ptr> states;
     bool EpsilonClosure(set<State::Ptr>, set<State::Ptr>& states) const;
     bool EpsilonClosure(int state, set<State::Ptr>& closure) const;
-    
+
 private:
     Automaton();
     Automaton::WeakPtr self;
     Automaton::Ptr operator~() const;
-    
+
 };
 
 
 namespace {
-template <typename T>
-bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&))
-{
-        std::istringstream iss(s, std::istringstream::in);
-        return !(iss >> f >> t).fail();
-}
+    template <typename T>
+        bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&))
+        {
+            std::istringstream iss(s, std::istringstream::in);
+            return !(iss >> f >> t).fail();
+        }
 
 }
 

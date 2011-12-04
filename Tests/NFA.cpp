@@ -51,11 +51,11 @@ TEST_F(NFATests, CorrectConstruction)
 {
     EXPECT_TRUE(bookProblem->IsNFA());
 }
-#if 0
+
 TEST_F(NFATests, Converstion)
 {
-    bookProblem->opSubsetConversion();
-    EXPECT_FALSE(bookProblem->IsNFA());
+    Automaton::Ptr dfa = bookProblem->opSubsetConversion();
+    EXPECT_FALSE(dfa->IsNFA());
 }
 
 TEST_F(NFATests, EpsilonClosure2)
@@ -80,7 +80,7 @@ TEST_F(NFATests, EpsilonClosure2)
 
     set<int> calcClosure;
     incomplete->EpsilonClosure(1, calcClosure);
-    calcClosure.sort();
+    
     EXPECT_EQ(expectedClosure.size(), calcClosure.size());
     set<int>::const_iterator c = calcClosure.begin();
     for(list<int>::const_iterator e = expectedClosure.begin();
@@ -97,10 +97,10 @@ TEST_F(NFATests, EpsilonClosure)
     expectedClosure.push_back(1);
     expectedClosure.push_back(3);
 
-    list<int> calcClosure;
+    set<int> calcClosure;
     bookProblem->EpsilonClosure(1, calcClosure);
     
-    list<int>::const_iterator c = calcClosure.begin();
+    set<int>::const_iterator c = calcClosure.begin();
     for(list<int>::const_iterator e = expectedClosure.begin();
             e != expectedClosure.end();
             ++e, ++c)
@@ -109,4 +109,3 @@ TEST_F(NFATests, EpsilonClosure)
     }
 }
 
-#endif
