@@ -13,36 +13,42 @@
 #include <list>
 #include <tr1/memory>
 #include <string>
-
+#include <set>
 using namespace std;
 class Automaton
 {
 public:
-       
+    friend class IntersectTests; 
+    typedef string StateName_t;
+    typedef string Label_t;
     typedef std::tr1::shared_ptr<Automaton> Ptr;
     typedef std::tr1::weak_ptr<Automaton> WeakPtr;
     typedef list<string> Sequence; 
     static Automaton::Ptr construct();
     static Automaton::Ptr construct(Automaton::WeakPtr const copy);
     virtual ~Automaton();
+    void AddState(StateName_t Name);
     void AddState(int Name);
-    void AddTransition(int FromNode, int ToNode, string label);
+    void AddTransition(StateName_t FromNode, StateName_t ToNode, Label_t label);
+    void AddTransition(int FromNode, int ToNode, Label_t label);
     void SetStartState(int Name);
     void AddFinalState(int Name);
+    void SetStartState(StateName_t Name);
+    void AddFinalState(StateName_t Name);
     bool Run(Sequence input) const;
-    int GetStartState() const;
-    list<int> GetFinalStates() const;
+    StateName_t GetStartState() const;
+    list<StateName_t> GetFinalStates() const;
     ///Returns a List of sequences accepted by the state machine.
     bool FindSequence(Sequence& acceptedSequence) const;
-    bool FindPath(int start, list<int>& result) const;
+    bool FindPath(StateName_t start, list<StateName_t>& result) const;
     // Implements complement!
     Automaton::Ptr opIntersect(Automaton::Ptr const rhs) const;
-    Automaton::Ptr opUnion(Automaton::Ptr const rhs) const;
     Automaton::Ptr opComplement() const;
-    
 protected:
-    list<int> GetAdjecentStates(int state) const;
-    string FindTransitionToState(int a, int b) const;
+    set<string> Alphabet;
+    StateName_t CreateCombinedStatesName(StateName_t, StateName_t) const;
+    list<StateName_t> GetAdjecentStates(StateName_t state) const;
+    string FindTransitionToState(StateName_t a, StateName_t b) const;
     Automaton (Automaton const & p);
     Automaton operator=(Automaton const &);
  class State
@@ -51,24 +57,26 @@ protected:
         typedef std::tr1::shared_ptr<State> Ptr;
         typedef std::tr1::weak_ptr<State> WeakPtr;
         static Ptr construct(int Name);
+        static Ptr construct(StateName_t Name);
         bool IsStart() const;
         void IsStart(bool);
         bool IsFinal() const;
         void IsFinal(bool);
-        int Name() const;
-        void Name(int);
+        StateName_t Name() const;
+        void Name(string);
+        StateName_t Move(string label) const;
         virtual ~State();
-        map<string, int> transitions;
+        map<StateName_t, string> transitions;
     private:
         bool isStart;
         bool isFinal;
-        int name;
-        State(int Name);
+        StateName_t name;
+        State(StateName_t Name);
         State::WeakPtr self;
     };
     
-    int startState;
-    map<int, State::Ptr> states;
+    StateName_t startState;
+    map<StateName_t, State::Ptr> states;
     
 private:
     Automaton();
