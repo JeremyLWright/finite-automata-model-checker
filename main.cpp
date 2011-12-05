@@ -26,9 +26,11 @@ int main(int argc, const char *argv[])
      
     JFLAP* jflap = new JFLAP(argv[1]);
     Automaton::Ptr specification = jflap->GetAutomaton();
-    
+    delete jflap;
+
     JFLAP* implInput = new JFLAP(argv[2]);
     Automaton::Ptr implementation = implInput->GetAutomaton();
+    delete implInput;
 
     Automaton::Ptr lm = implementation->opIntersect(specification->opComplement());
 

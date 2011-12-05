@@ -22,12 +22,12 @@ using namespace std;
 using namespace rapidxml;
 
 namespace {
-template <typename T>
-bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&))
-{
-        std::istringstream iss(s, std::istringstream::in);
-        return !(iss >> f >> t).fail();
-}
+    template <typename T>
+        bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&))
+        {
+            std::istringstream iss(s, std::istringstream::in);
+            return !(iss >> f >> t).fail();
+        }
 
 }
 
@@ -40,7 +40,7 @@ JFLAP::JFLAP(string filename)
     memset(xml_document_buffer, 0, documentSize+1);
     ifstream inputFile(filename.c_str());
     inputFile.read(xml_document_buffer, documentSize);
-    
+
     rapidxml::xml_document<> doc;
     doc.parse<0>(xml_document_buffer);
 
@@ -55,9 +55,9 @@ JFLAP::JFLAP(string filename)
     //Verify the file is in the expected format.
     if(strncmp(automatonStart->name(), "automaton", sizeof("automaton")))
     {
-    
-    cerr << "File is not in expected format. Expected to see 'automaton', got " << automatonStart->name() << endl;
-    //TODO throw exception
+
+        cerr << "File is not in expected format. Expected to see 'automaton', got " << automatonStart->name() << endl;
+        //TODO throw exception
     }
 
     a = Automaton::construct();
