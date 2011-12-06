@@ -22,4 +22,4 @@ paper.pdf: paper.tex BuggyImplementation.png Correct.png disjoint.png Incomplete
 	pdflatex paper.tex
 
 clean: 
-	rm -rf *.aux *.log *.pdf *.png *.bbl *.blg
+	rm -rf *.aux *.log *.pdf *.bbl *.blg

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.6.0_23" class="java.beans.XMLDecoder">
+ <object class="com.horstmann.violet.ClassDiagramGraph">
+  <void method="addNode">
+   <object id="ClassNode0" class="com.horstmann.violet.ClassNode">
+    <void property="attributes">
+     <void property="text">
+      <string>map&lt;StateName, State::Ptr&gt; states;</string>
+     </void>
+    </void>
+    <void property="methods">
+     <void property="text">
+      <string>AddState(name)
+AddTransitions(From, To, Label)
+SetStartState(Name)
+AddFinalState(Name)
+Run()
+</string>
+     </void>
+    </void>
+    <void property="name">
+     <void property="text">
+      <string>Automaton</string>
+     </void>
+    </void>
+   </object>
+   <object class="java.awt.geom.Point2D$Double">
+    <void method="setLocation">
+     <double>661.0</double>
+     <double>238.0</double>
+    </void>
+   </object>
+  </void>
+  <void method="addNode">
+   <object id="ClassNode1" class="com.horstmann.violet.ClassNode">
+    <void property="attributes">
+     <void property="text">
+      <string>map&lt;Label, StateName&gt; transitions;
+bool isStart;
+bool isFinal;
+StateName Name;</string>
+     </void>
+    </void>
+    <void property="methods">
+     <void property="text">
+      <string>Move(label)</string>
+     </void>
+    </void>
+    <void property="name">
+     <void property="text">
+      <string>State</string>
+     </void>
+    </void>
+   </object>
+   <object class="java.awt.geom.Point2D$Double">
+    <void method="setLocation">
+     <double>656.0</double>
+     <double>423.0</double>
+    </void>
+   </object>
+  </void>
+  <void method="connect">
+   <object class="com.horstmann.violet.ClassRelationshipEdge">
+    <void property="bentStyle">
+     <object class="com.horstmann.violet.BentStyle" field="HVH"/>
+    </void>
+    <void property="startArrowHead">
+     <object class="com.horstmann.violet.ArrowHead" field="BLACK_DIAMOND"/>
+    </void>
+   </object>
+   <object idref="ClassNode0"/>
+   <object idref="ClassNode1"/>
+  </void>
+ </object>
+</java>
